@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, Suspense } from 'react'
+import { useState, useEffect, useMemo, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import type { MediaItem } from '@/lib/types'
@@ -8,7 +8,7 @@ import type { MediaItem } from '@/lib/types'
 function SendTransferForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([])
   const [selectedMedia, setSelectedMedia] = useState('')
   const [recipientUsername, setRecipientUsername] = useState('')
@@ -16,19 +16,21 @@ function SendTransferForm() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const loadMedia = useCallback(async () => {
+  useEffect(() => {
     const preselected = searchParams.get('mediaId')
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) { router.push('/auth/login'); return }
-    const { data } = await supabase
-      .from('media')
-      .select('*')
-      .eq('owner_id', user.id)
-    setMediaItems(data ?? [])
-    if (preselected) setSelectedMedia(preselected)
-  }, [supabase, router, searchParams])
-
-  useEffect(() => { loadMedia() }, [loadMedia])
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (!user) { router.push('/auth/login'); return }
+      supabase
+        .from('media')
+        .select('*')
+        .eq('owner_id', user.id)
+        .then(({ data }) => {
+          setMediaItems(data ?? [])
+          if (preselected) setSelectedMedia(preselected)
+        })
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

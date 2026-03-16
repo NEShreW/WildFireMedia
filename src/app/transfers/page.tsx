@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -15,7 +15,7 @@ interface TransferRow {
 
 export default function TransfersPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = useMemo(() => createClient(), [])
   const [incoming, setIncoming] = useState<TransferRow[]>([])
   const [outgoing, setOutgoing] = useState<TransferRow[]>([])
   const [loading, setLoading] = useState(true)
