@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server'
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -16,7 +17,7 @@ export async function POST(
     const { data: transfer, error: transferError } = await adminClient
       .from('transfers')
       .select('*, media:media_id(*)')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('recipient_id', user.id)
       .eq('status', 'pending')
       .single()
@@ -65,7 +66,7 @@ export async function POST(
     const { error: updateError } = await adminClient
       .from('transfers')
       .update({ status: 'accepted', updated_at: new Date().toISOString() })
-      .eq('id', params.id)
+      .eq('id', id)
 
     if (updateError) {
       return NextResponse.json({ error: updateError.message }, { status: 500 })

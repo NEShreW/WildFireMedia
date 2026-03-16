@@ -4,9 +4,10 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -14,7 +15,7 @@ export async function GET(
     const { data: media, error } = await supabase
       .from('media')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .eq('owner_id', user.id)
       .single()
 
