@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
@@ -20,7 +20,7 @@ export default function TransfersPage() {
   const [outgoing, setOutgoing] = useState<TransferRow[]>([])
   const [loading, setLoading] = useState(true)
 
-  const fetchTransfers = async () => {
+  const fetchTransfers = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) { router.push('/auth/login'); return }
 
@@ -41,9 +41,9 @@ export default function TransfersPage() {
     setIncoming(inc ?? [])
     setOutgoing(out ?? [])
     setLoading(false)
-  }
+  }, [supabase, router])
 
-  useEffect(() => { fetchTransfers() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchTransfers() }, [fetchTransfers])
 
   const acceptTransfer = async (id: string) => {
     const res = await fetch(`/api/transfers/${id}/accept`, { method: 'POST' })

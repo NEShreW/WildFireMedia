@@ -14,7 +14,7 @@ export default function Nav() {
     supabase.auth.getUser().then(({ data: { user } }) => {
       setEmail(user?.email ?? null)
     })
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [supabase.auth])
 
   const signOut = async () => {
     await supabase.auth.signOut()

@@ -3,7 +3,7 @@ import localFont from 'next/font/local'
 import './globals.css'
 import Nav from '@/components/Nav'
 
-const inter = localFont({
+const geist = localFont({
   src: './fonts/GeistVF.woff',
   variable: '--font-geist',
 })
@@ -20,7 +20,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={geist.className}>
         <Nav />
         <main className="min-h-screen bg-gray-50">
           {children}
